@@ -32,7 +32,7 @@ CUSBProxyDevice::CUSBProxyDevice()
 	long endpointNo = 0;
 	ISoftUSBEndpoint **ppiEndpoints = NULL;
 
-    ResetMembers();
+	ResetMembers();
 
 	m_pUsbIdentifier = CUSBProxyDevice::CreateUSBProxyIdentifier(kUsbVendorId, kUsbProductId);
 	CSoftUSBWrapper::ConfigDSFDevice(&m_piSoftUSBDevice, m_pUsbIdentifier);
@@ -58,27 +58,27 @@ CUSBProxyDevice::~CUSBProxyDevice()
 	if (NULL != m_pUsbIdentifier)
 		delete m_pUsbIdentifier;
 
-    // Release the conneciton point
-    ReleaseConnectionPoint();
-    
-    if (NULL != m_CharDevice)
-    {
-    	m_CharDevice->Close();
-    	delete m_CharDevice;
-    }
+	// Release the conneciton point
+	ReleaseConnectionPoint();
 
-    // Release any interface which the device is holding
-    RELEASE(m_piConnectionPoint);
-    RELEASE(m_piINEndpoint);
-    RELEASE(m_piOUTEndpoint);
+	if (NULL != m_CharDevice)
+	{
+		m_CharDevice->Close();
+		delete m_CharDevice;
+	}
 
-    if (NULL != m_piSoftUSBDevice)
-    {
-        (void)m_piSoftUSBDevice->Destroy();
-        RELEASE(m_piSoftUSBDevice);
-    }
+	// Release any interface which the device is holding
+	RELEASE(m_piConnectionPoint);
+	RELEASE(m_piINEndpoint);
+	RELEASE(m_piOUTEndpoint);
 
-    ResetMembers();
+	if (NULL != m_piSoftUSBDevice)
+	{
+		(void)m_piSoftUSBDevice->Destroy();
+		RELEASE(m_piSoftUSBDevice);
+	}
+
+	ResetMembers();
 }
 
 /*++
@@ -89,12 +89,12 @@ void CUSBProxyDevice::ResetMembers()
 
 {
 	m_pUsbIdentifier     = NULL;
-    m_piSoftUSBDevice    = NULL;
-    m_piINEndpoint       = NULL;
-    m_piOUTEndpoint      = NULL;
-    m_piConnectionPoint  = NULL;
-    m_dwConnectionCookie = 0;
-    m_CharDevice         = NULL;
+	m_piSoftUSBDevice    = NULL;
+	m_piINEndpoint       = NULL;
+	m_piOUTEndpoint      = NULL;
+	m_piConnectionPoint  = NULL;
+	m_dwConnectionCookie = 0;
+	m_CharDevice         = NULL;
 	m_UserCharCallback.ProcessData = NULL;
 	m_UserCharCallback.pUser       = NULL;
 }
@@ -110,39 +110,39 @@ USBIdentifier* CUSBProxyDevice::CreateUSBProxyIdentifier(SHORT vendorId, SHORT p
 	pUsb->sProductDesc  = L"Simulated Generic USB-Char convertor device";
 	pUsb->_class        = 0xFF; // 0xFF = Vendor specfic device class
 	pUsb->subClass      = 0xFF; // 0xFF = Vendor specific device sub-class
-    pUsb->protocol      = 0xFF; // 0xFF = Vendor specific device protocol
+	pUsb->protocol      = 0xFF; // 0xFF = Vendor specific device protocol
 
-    pUsb->stringIndex = 1; // The first string collection ID is 1, 0 being reserved
+	pUsb->stringIndex = 1; // The first string collection ID is 1, 0 being reserved
 
-    // Create the USB device configuration
-    pUsb->configNo = 1;
-    USBIdentifier::USBConfiguration *pConfig =  pUsb->pConfig = new USBIdentifier::USBConfiguration();
-    pConfig->sConfiguration = L"Configuration with a single I/O interface";
-    pConfig->configAttr.Bits.bRemoteWakeup = 0; // Device does not do remote wakeup
-    pConfig->configAttr.Bits.bSelfPowered  = 1; // Device is self-powered
+	// Create the USB device configuration
+	pUsb->configNo = 1;
+	USBIdentifier::USBConfiguration *pConfig =  pUsb->pConfig = new USBIdentifier::USBConfiguration();
+	pConfig->sConfiguration = L"Configuration with a single I/O interface";
+	pConfig->configAttr.Bits.bRemoteWakeup = 0; // Device does not do remote wakeup
+	pConfig->configAttr.Bits.bSelfPowered  = 1; // Device is self-powered
 
-    // Create one USB interface for the above configuration
-    pConfig->interfaceNo = 1;
-    USBIdentifier::USBInterface *pInterface = pConfig->pInterface = new USBIdentifier::USBInterface();
-    pInterface->sInterface = L"Interface with bulk IN endpoint and bulk OUT endpoint";
+	// Create one USB interface for the above configuration
+	pConfig->interfaceNo = 1;
+	USBIdentifier::USBInterface *pInterface = pConfig->pInterface = new USBIdentifier::USBInterface();
+	pInterface->sInterface = L"Interface with bulk IN endpoint and bulk OUT endpoint";
 	pInterface->_class     = 0xFF; // 0xFF = Vendor specfic device class
-    pInterface->subClass   = 0xFF; // 0xFF = Vendor specific device sub-class
-    pInterface->protocol   = 0xFF; // 0xFF = Vendor specific device protocol
+	pInterface->subClass   = 0xFF; // 0xFF = Vendor specific device sub-class
+	pInterface->protocol   = 0xFF; // 0xFF = Vendor specific device protocol
 
-    // Create the 2 Enpoints for this interface
-    pInterface->endpointsNo = 2;
-    USBIdentifier::USBEndpoint *pEndpoint = pInterface->pEndpoints = new USBIdentifier::USBEndpoint[2];
-    // Configure the IN Endpoint
-    pEndpoint->address           = 0x81; // Enpoint IN Address
-    pEndpoint->endpointAttr.Byte = 0x02; // Bulk data endpoint
-    pEndpoint->maxPacketSize     = 1024;
-    pEndpoint++;
-    // Configure the OUT Endpoint
-    pEndpoint->address           = 0x02; // Enpoint OUT Address
-    pEndpoint->endpointAttr.Byte = 0x02; // Bulk data endpoint
-    pEndpoint->maxPacketSize     = 1024;
+	// Create the 2 Enpoints for this interface
+	pInterface->endpointsNo = 2;
+	USBIdentifier::USBEndpoint *pEndpoint = pInterface->pEndpoints = new USBIdentifier::USBEndpoint[2];
+	// Configure the IN Endpoint
+	pEndpoint->address           = 0x81; // Enpoint IN Address
+	pEndpoint->endpointAttr.Byte = 0x02; // Bulk data endpoint
+	pEndpoint->maxPacketSize     = 1024;
+	pEndpoint++;
+	// Configure the OUT Endpoint
+	pEndpoint->address           = 0x02; // Enpoint OUT Address
+	pEndpoint->endpointAttr.Byte = 0x02; // Bulk data endpoint
+	pEndpoint->maxPacketSize     = 1024;
 
-    return pUsb;
+	return pUsb;
 }
 
 
@@ -166,35 +166,35 @@ Return value:
 HRESULT CUSBProxyDevice::SetupConnectionPoint(IUnknown *punkObject,
                                               REFIID    iidConnectionPoint)
 {
-    HRESULT hr = S_OK;
-    IConnectionPointContainer *piConnectionPointContainer = NULL;
-    IUnknown                  *punkSink = NULL;
+	HRESULT hr = S_OK;
+	IConnectionPointContainer *piConnectionPointContainer = NULL;
+	IUnknown                  *punkSink = NULL;
 
-    CHECK_FALSE( NULL != punkObject, E_UNEXPECTED );
+	CHECK_FALSE( NULL != punkObject, E_UNEXPECTED );
 
-    // If there is already connection point enabled, disable it
-    if(NULL != m_piConnectionPoint)
-    {
-        CHECK_FAIL( ReleaseConnectionPoint() );
-    }
+	// If there is already connection point enabled, disable it
+	if(NULL != m_piConnectionPoint)
+	{
+		CHECK_FAIL( ReleaseConnectionPoint() );
+	}
 
-    CHECK_FAIL( punkObject->QueryInterface(IID_IConnectionPointContainer,
-                                          reinterpret_cast<void **>(&piConnectionPointContainer)) );
+	CHECK_FAIL( punkObject->QueryInterface(IID_IConnectionPointContainer,
+	                                      reinterpret_cast<void **>(&piConnectionPointContainer)) );
 
-    CHECK_FAIL( piConnectionPointContainer->FindConnectionPoint(iidConnectionPoint,
-                                                               &m_piConnectionPoint) );
+	CHECK_FAIL( piConnectionPointContainer->FindConnectionPoint(iidConnectionPoint,
+	                                                           &m_piConnectionPoint) );
 
-    // Get the IUknown of this interface as this is the event sink
-    punkSink = (this)->GetUnknown();
+	// Get the IUknown of this interface as this is the event sink
+	punkSink = (this)->GetUnknown();
 
-    CHECK_FALSE( NULL != punkSink, E_UNEXPECTED );
+	CHECK_FALSE( NULL != punkSink, E_UNEXPECTED );
 
-    CHECK_FAIL( m_piConnectionPoint->Advise(punkSink, &m_dwConnectionCookie) );
+	CHECK_FAIL( m_piConnectionPoint->Advise(punkSink, &m_dwConnectionCookie) );
 
 Exit:
-    RELEASE(piConnectionPointContainer);
+	RELEASE(piConnectionPointContainer);
 
-    return hr;
+	return hr;
 }
 
 
@@ -205,17 +205,17 @@ Routine Description:
 --*/
 HRESULT CUSBProxyDevice::ReleaseConnectionPoint()
 {
-    HRESULT hr = S_OK;
-    
-    if (NULL != m_piConnectionPoint)
-    {
-        m_piConnectionPoint->Unadvise(m_dwConnectionCookie);
-        m_dwConnectionCookie = 0;
-    }
+	HRESULT hr = S_OK;
 
-    RELEASE(m_piConnectionPoint);
+	if (NULL != m_piConnectionPoint)
+	{
+		m_piConnectionPoint->Unadvise(m_dwConnectionCookie);
+		m_dwConnectionCookie = 0;
+	}
 
-    return hr;
+	RELEASE(m_piConnectionPoint);
+
+	return hr;
 }
 
 
@@ -227,7 +227,7 @@ Routine Description:
 HRESULT CUSBProxyDevice::CharDeviceData(void *pUser, BYTE* data, ULONG size)
 {
 	HRESULT hr     = S_OK;
-    BYTE bINStatus = USB_ACK;
+	BYTE bINStatus = USB_ACK;
 	CUSBProxyDevice *pThis = reinterpret_cast<CUSBProxyDevice*>(pUser);
 
 	// this came from the CharDevice, possible static allocation so copy the buffer
@@ -259,19 +259,19 @@ Return value:
 --*/
 STDMETHODIMP CUSBProxyDevice::get_DSFDevice(DSFDevice** ppDSFDevice)
 {
-    HRESULT hr = S_OK;
+	HRESULT hr = S_OK;
 
-    CHECK_FALSE( NULL != ppDSFDevice, E_POINTER );
-    *ppDSFDevice = NULL;
+	CHECK_FALSE( NULL != ppDSFDevice, E_POINTER );
+	*ppDSFDevice = NULL;
 
-    // Validate the the USB device exists else this is an internal error
-    CHECK_FALSE( NULL != m_piSoftUSBDevice, E_FAIL );
+	// Validate the the USB device exists else this is an internal error
+	CHECK_FALSE( NULL != m_piSoftUSBDevice, E_FAIL );
 
-    CHECK_FAIL( m_piSoftUSBDevice->get_DSFDevice(ppDSFDevice) );
+	CHECK_FAIL( m_piSoftUSBDevice->get_DSFDevice(ppDSFDevice) );
 
 Exit:
 
-    return hr;
+	return hr;
 }
 
 
@@ -290,22 +290,22 @@ Routine Description:
 --*/
 STDMETHODIMP CUSBProxyDevice::StartDataProcessing()
 {
-    HRESULT hr = S_OK;
-    CLogger::UserLogCallback logger;
-    logger.Logger = CUSBProxyDevice::CharDeviceData;
-    logger.pUser  = this;
+	HRESULT hr = S_OK;
+	CLogger::UserLogCallback logger;
+	logger.Logger = CUSBProxyDevice::CharDeviceData;
+	logger.pUser  = this;
 
-    // Set up event sink on the OUT endpoint
-    CHECK_FAIL( SetupConnectionPoint(m_piOUTEndpoint, __uuidof(ISoftUSBEndpointEvents)) );
+	// Set up event sink on the OUT endpoint
+	CHECK_FAIL( SetupConnectionPoint(m_piOUTEndpoint, __uuidof(ISoftUSBEndpointEvents)) );
 
-    // Start connecting to the Char Device
+	// Start connecting to the Char Device
 	CHECK_FAIL( ICharDevice<BYTE>::Open("127.0.0.1:8080", &logger, &m_CharDevice) );
 
 	// Start the Reader Thread
 	CHECK_FAIL( m_CharDevice->Read(&m_UserCharCallback) );
 
 Exit:
-    return hr;
+	return hr;
 }
 
 
@@ -316,55 +316,55 @@ Routine Description:
 --*/
 STDMETHODIMP CUSBProxyDevice::StopDataProcessing()
 {
-    HRESULT hr = S_OK;
+	HRESULT hr = S_OK;
 
-    // Remove the event sink on the OUT endpoint
-    CHECK_FAIL( ReleaseConnectionPoint() );
+	// Remove the event sink on the OUT endpoint
+	CHECK_FAIL( ReleaseConnectionPoint() );
 
 Exit:
-    return hr;
+	return hr;
 }
 
 
 HRESULT _stdcall CUSBProxyDevice::Fire_LogDataProcessing(BYTE *data, ULONG size)
 {
 	USES_CONVERSION;
-    HRESULT hr = S_OK;
+	HRESULT hr = S_OK;
 
-    int cConnections = m_vec.GetSize();
+	int cConnections = m_vec.GetSize();
 
-    for (int iConnection = 0; iConnection < cConnections; iConnection++)
-    {
-        this->Lock();
-        CComPtr<IUnknown> punkConnection = m_vec.GetAt(iConnection);
-        this->Unlock();
+	for (int iConnection = 0; iConnection < cConnections; iConnection++)
+	{
+		this->Lock();
+		CComPtr<IUnknown> punkConnection = m_vec.GetAt(iConnection);
+		this->Unlock();
 
-        IDispatch * pConnection = static_cast<IDispatch *>(punkConnection.p);
+		IDispatch * pConnection = static_cast<IDispatch *>(punkConnection.p);
 
-        if (pConnection)
-        {
-        	VARIANTARG logParam[1];
-        	BSTR toBePassed;
+		if (pConnection)
+		{
+			VARIANTARG logParam[1];
+			BSTR toBePassed;
 
-        	CHECK_FALSE( (toBePassed = SysAllocStringByteLen( (LPCSTR)(A2W((LPCSTR)data)), size * 2)) != NULL, \
-        			E_OUTOFMEMORY );
-        	logParam[0].vt = VT_BSTR; logParam[0].bstrVal = toBePassed;
+			CHECK_FALSE( (toBePassed = SysAllocStringByteLen( (LPCSTR)(A2W((LPCSTR)data)), size * 2)) != NULL, \
+			                     E_OUTOFMEMORY );
+			logParam[0].vt = VT_BSTR; logParam[0].bstrVal = toBePassed;
 
-        	DISPPARAMS dispParams = { logParam, // paramters
+			DISPPARAMS dispParams = { logParam, // paramters
 									  NULL,     // Named Parameters = JScript doesn't understand this
 									  1,        // number of parameters
 									  0 };      // number of named parameters
-             hr = pConnection->Invoke(1, // The method's id number in the SoftUSBProxy.idl IUSBProxyDeviceEvents dispinterface
-            		 IID_NULL, LOCALE_USER_DEFAULT, DISPATCH_METHOD,
-            		 &dispParams, // the parameter list to be passed as Variants
-            		 NULL, NULL, NULL);
+			hr = pConnection->Invoke(1, // The method's id number in the SoftUSBProxy.idl IUSBProxyDeviceEvents dispinterface
+					 IID_NULL, LOCALE_USER_DEFAULT, DISPATCH_METHOD,
+					 &dispParams, // the parameter list to be passed as Variants
+					 NULL, NULL, NULL);
 
-             SysFreeString(toBePassed);
-        }
-    }
+			SysFreeString(toBePassed);
+		}
+	}
 
 Exit:
-    return hr;
+	return hr;
 }
 
 
@@ -386,14 +386,14 @@ Return value:
 STDMETHODIMP CUSBProxyDevice::OnSetupTransfer(BYTE DataToggle,BYTE *pbDataBuffer,
                                ULONG cbDataBuffer, BYTE *pbStatus)
 {
-    HRESULT hr = E_NOTIMPL;
+	HRESULT hr = E_NOTIMPL;
 
-    UNREFERENCED_PARAMETER(DataToggle);
-    UNREFERENCED_PARAMETER(pbDataBuffer);
-    UNREFERENCED_PARAMETER(cbDataBuffer);
-    UNREFERENCED_PARAMETER(pbStatus);
+	UNREFERENCED_PARAMETER(DataToggle);
+	UNREFERENCED_PARAMETER(pbDataBuffer);
+	UNREFERENCED_PARAMETER(cbDataBuffer);
+	UNREFERENCED_PARAMETER(pbStatus);
 
-    return hr;
+	return hr;
 }
 
 
@@ -414,26 +414,26 @@ Return value:
 STDMETHODIMP CUSBProxyDevice::OnWriteTransfer(BYTE DataToggle, BYTE *pbDataBuffer,
                                ULONG cbDataBuffer, BYTE *pbStatus)
 {
-    
-    HRESULT hr = S_OK;
-    UNREFERENCED_PARAMETER(DataToggle);
 
-    // Check that the IN endpoint is valid
-    CHECK_FALSE( NULL != m_piINEndpoint, E_UNEXPECTED);
+	HRESULT hr = S_OK;
+	UNREFERENCED_PARAMETER(DataToggle);
 
-    CHECK_FAIL( Fire_LogDataProcessing(pbDataBuffer, cbDataBuffer) )
+	// Check that the IN endpoint is valid
+	CHECK_FALSE( NULL != m_piINEndpoint, E_UNEXPECTED);
 
-    CHECK_FAIL( m_CharDevice->Write(pbDataBuffer, cbDataBuffer) );
+	CHECK_FAIL( Fire_LogDataProcessing(pbDataBuffer, cbDataBuffer) )
 
-    // ACK the status as the data was successfully sent to the IN endpoint
-    *pbStatus = USB_ACK;
+	CHECK_FAIL( m_CharDevice->Write(pbDataBuffer, cbDataBuffer) );
+
+	// ACK the status as the data was successfully sent to the IN endpoint
+	*pbStatus = USB_ACK;
 
 Exit:
-    if (FAILED(hr))
-    {
-        *pbStatus = USB_STALL;
-    }
-    return hr;
+	if (FAILED(hr))
+	{
+		*pbStatus = USB_STALL;
+	}
+	return hr;
 }
 
 
@@ -455,15 +455,15 @@ STDMETHODIMP CUSBProxyDevice::OnReadTransfer(BYTE DataToggle, BYTE  *pbDataBuffe
                               ULONG   cbDataBuffer,ULONG *cbDataWritten,
                               BYTE *pbStatus)
 {
-    HRESULT hr = E_NOTIMPL;
+	HRESULT hr = E_NOTIMPL;
 
-    UNREFERENCED_PARAMETER(DataToggle);
-    UNREFERENCED_PARAMETER(pbDataBuffer);
-    UNREFERENCED_PARAMETER(cbDataBuffer);
-    UNREFERENCED_PARAMETER(cbDataWritten);
-    UNREFERENCED_PARAMETER(pbStatus);
+	UNREFERENCED_PARAMETER(DataToggle);
+	UNREFERENCED_PARAMETER(pbDataBuffer);
+	UNREFERENCED_PARAMETER(cbDataBuffer);
+	UNREFERENCED_PARAMETER(cbDataWritten);
+	UNREFERENCED_PARAMETER(pbStatus);
 
-    return hr;
+	return hr;
 }
 
 
@@ -489,17 +489,17 @@ STDMETHODIMP CUSBProxyDevice::OnDeviceRequest(USBSETUPREQUEST *pSetupRequest,
                                ULONG  cbHostData, BYTE **ppbResponseData,
                                ULONG *pcbResponseData,BYTE  *pbSetupStatus)
 {
-    HRESULT hr = E_NOTIMPL;
+	HRESULT hr = E_NOTIMPL;
 
-    UNREFERENCED_PARAMETER(pSetupRequest);
-    UNREFERENCED_PARAMETER(RequestHandle);
-    UNREFERENCED_PARAMETER(pbHostData);
-    UNREFERENCED_PARAMETER(cbHostData);
-    UNREFERENCED_PARAMETER(ppbResponseData);
-    UNREFERENCED_PARAMETER(pcbResponseData);
-    UNREFERENCED_PARAMETER(pbSetupStatus);
+	UNREFERENCED_PARAMETER(pSetupRequest);
+	UNREFERENCED_PARAMETER(RequestHandle);
+	UNREFERENCED_PARAMETER(pbHostData);
+	UNREFERENCED_PARAMETER(cbHostData);
+	UNREFERENCED_PARAMETER(ppbResponseData);
+	UNREFERENCED_PARAMETER(pcbResponseData);
+	UNREFERENCED_PARAMETER(pbSetupStatus);
 
-    return hr;
+	return hr;
 }
 
 
@@ -517,10 +517,10 @@ Return value:
 STDMETHODIMP CUSBProxyDevice::OnDeviceRequestComplete(ULONG RequestHandle,
                                        BYTE *pbFinalRequestStatus)
 {
-    HRESULT hr = E_NOTIMPL;
+	HRESULT hr = E_NOTIMPL;
 
-    UNREFERENCED_PARAMETER(RequestHandle);
-    UNREFERENCED_PARAMETER(pbFinalRequestStatus);
+	UNREFERENCED_PARAMETER(RequestHandle);
+	UNREFERENCED_PARAMETER(pbFinalRequestStatus);
 
-    return hr;
+	return hr;
 }

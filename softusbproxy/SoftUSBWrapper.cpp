@@ -10,62 +10,62 @@ Routine Description:
 --*/
 HRESULT CSoftUSBWrapper::ConfigDSFDevice(ISoftUSBDevice **pUSBDevice, USBIdentifier *pUsbId)
 {
-    HRESULT hr = S_OK;
-    ISoftUSBDeviceQualifier *piDeviceQual = NULL;
-    ISoftUSBDevice *pDevice = NULL;
+	HRESULT hr = S_OK;
+	ISoftUSBDeviceQualifier *piDeviceQual = NULL;
+	ISoftUSBDevice *pDevice = NULL;
 
-    // Create the DSF Soft USB device interface coclass
-    CHECK_FAIL( ::CoCreateInstance(CLSID_SoftUSBDevice, \
-                            NULL, \
-                            CLSCTX_INPROC_SERVER, \
-                            __uuidof(ISoftUSBDevice), \
-                            reinterpret_cast<void**>(&pDevice)) );
-    *pUSBDevice = pDevice;
+	// Create the DSF Soft USB device interface coclass
+	CHECK_FAIL( ::CoCreateInstance(CLSID_SoftUSBDevice, \
+	                        NULL, \
+	                        CLSCTX_INPROC_SERVER, \
+	                        __uuidof(ISoftUSBDevice), \
+	                        reinterpret_cast<void**>(&pDevice)) );
+	*pUSBDevice = pDevice;
 
-    // Create the device qualifer
-    CHECK_FAIL( ::CoCreateInstance(CLSID_SoftUSBDeviceQualifier, \
-                            NULL, \
-                            CLSCTX_INPROC_SERVER, \
-                            __uuidof(ISoftUSBDeviceQualifier), \
-                            reinterpret_cast<void**>(&piDeviceQual)) );
+	// Create the device qualifer
+	CHECK_FAIL( ::CoCreateInstance(CLSID_SoftUSBDeviceQualifier, \
+	                        NULL, \
+	                        CLSCTX_INPROC_SERVER, \
+	                        __uuidof(ISoftUSBDeviceQualifier), \
+	                        reinterpret_cast<void**>(&piDeviceQual)) );
 
-    // Setup the device qualifier
-    CHECK_FAIL( piDeviceQual->put_USB(0x0200) ); //binary coded decimal USB version 2.0
-    CHECK_FAIL( piDeviceQual->put_DeviceClass(pUsbId->_class) );
-    CHECK_FAIL( piDeviceQual->put_DeviceSubClass(pUsbId->subClass) );
-    CHECK_FAIL( piDeviceQual->put_DeviceProtocol(pUsbId->protocol) );
-    CHECK_FAIL( piDeviceQual->put_MaxPacketSize0(64) ); //max packet size endpoint 0
-    CHECK_FAIL( piDeviceQual->put_NumConfigurations(pUsbId->configNo) );
+	// Setup the device qualifier
+	CHECK_FAIL( piDeviceQual->put_USB(0x0200) ); //binary coded decimal USB version 2.0
+	CHECK_FAIL( piDeviceQual->put_DeviceClass(pUsbId->_class) );
+	CHECK_FAIL( piDeviceQual->put_DeviceSubClass(pUsbId->subClass) );
+	CHECK_FAIL( piDeviceQual->put_DeviceProtocol(pUsbId->protocol) );
+	CHECK_FAIL( piDeviceQual->put_MaxPacketSize0(64) ); //max packet size endpoint 0
+	CHECK_FAIL( piDeviceQual->put_NumConfigurations(pUsbId->configNo) );
 
-    // Setup the device
-    CHECK_FAIL( pDevice->put_USB(0x0200) );                           //binary coded decimal USB version 2.0
-    CHECK_FAIL( pDevice->put_DeviceClass(pUsbId->_class) );
-    CHECK_FAIL( pDevice->put_DeviceSubClass(pUsbId->subClass) );
-    CHECK_FAIL( pDevice->put_DeviceProtocol(pUsbId->protocol) );
-    CHECK_FAIL( pDevice->put_MaxPacketSize0(64) );                    //max packet size endpoint 0
-    CHECK_FAIL( pDevice->put_Vendor(pUsbId->vendorId) );
-    CHECK_FAIL( pDevice->put_Product(pUsbId->productId) );
-    CHECK_FAIL( pDevice->put_Device(0x0100) );                        //Binary decimal coded version 1.0
-    CHECK_FAIL( pDevice->put_RemoteWakeup(VARIANT_FALSE) );           //Device does not suppport remote wake up
-    CHECK_FAIL( pDevice->put_HasExternalPower(VARIANT_TRUE) );        //Indicate that the device has power
+	// Setup the device
+	CHECK_FAIL( pDevice->put_USB(0x0200) );                           //binary coded decimal USB version 2.0
+	CHECK_FAIL( pDevice->put_DeviceClass(pUsbId->_class) );
+	CHECK_FAIL( pDevice->put_DeviceSubClass(pUsbId->subClass) );
+	CHECK_FAIL( pDevice->put_DeviceProtocol(pUsbId->protocol) );
+	CHECK_FAIL( pDevice->put_MaxPacketSize0(64) );                    //max packet size endpoint 0
+	CHECK_FAIL( pDevice->put_Vendor(pUsbId->vendorId) );
+	CHECK_FAIL( pDevice->put_Product(pUsbId->productId) );
+	CHECK_FAIL( pDevice->put_Device(0x0100) );                        //Binary decimal coded version 1.0
+	CHECK_FAIL( pDevice->put_RemoteWakeup(VARIANT_FALSE) );           //Device does not suppport remote wake up
+	CHECK_FAIL( pDevice->put_HasExternalPower(VARIANT_TRUE) );        //Indicate that the device has power
 
-    // Insert the manufacturer string
-    CHECK_FAIL( CSoftUSBWrapper::AddDSFString(pDevice, pUsbId->sManufacturer, pUsbId->stringIndex) );
-    CHECK_FAIL( pDevice->put_Manufacturer(pUsbId->stringIndex++)); //Index of the manufacturer string
+	// Insert the manufacturer string
+	CHECK_FAIL( CSoftUSBWrapper::AddDSFString(pDevice, pUsbId->sManufacturer, pUsbId->stringIndex) );
+	CHECK_FAIL( pDevice->put_Manufacturer(pUsbId->stringIndex++)); //Index of the manufacturer string
 
-    // Insert the product descripton string
-    CHECK_FAIL( CSoftUSBWrapper::AddDSFString(pDevice, pUsbId->sProductDesc, pUsbId->stringIndex) );
-    CHECK_FAIL( pDevice->put_ProductDesc(pUsbId->stringIndex++)); //Index of the product descripton string
+	// Insert the product descripton string
+	CHECK_FAIL( CSoftUSBWrapper::AddDSFString(pDevice, pUsbId->sProductDesc, pUsbId->stringIndex) );
+	CHECK_FAIL( pDevice->put_ProductDesc(pUsbId->stringIndex++)); //Index of the product descripton string
 
-    // Add the device qualifier
-    CHECK_FAIL( pDevice->put_DeviceQualifier(piDeviceQual) );
+	// Add the device qualifier
+	CHECK_FAIL( pDevice->put_DeviceQualifier(piDeviceQual) );
 
-    // Add the configurations for this device
-    CHECK_FAIL( CSoftUSBWrapper::AddDSFConfigs(pDevice, pUsbId) );
+	// Add the configurations for this device
+	CHECK_FAIL( CSoftUSBWrapper::AddDSFConfigs(pDevice, pUsbId) );
 
 Exit:
-    RELEASE(piDeviceQual);
-    return hr;
+	RELEASE(piDeviceQual);
+	return hr;
 }
 
 /*++
@@ -148,13 +148,13 @@ HRESULT CSoftUSBWrapper::AddDSFString(ISoftUSBDevice *pUSBDevice, LPCWSTR sStrin
 	//This index is used both to set the string's descriptors position in the pUSBDevice->Strings
 	//and is the index value the GetDescriptors request from the host.
 	//Note that we don't use string descriptor index zero because that is a reserved value for a
-    //device's language ID descriptor.
+	//device's language ID descriptor.
 
 	CHECK_FAIL( CoCreateInstance(CLSID_SoftUSBString,
-                          NULL,
-                          CLSCTX_INPROC_SERVER,
-                          __uuidof(ISoftUSBString),
-                          reinterpret_cast<void**>(&piString)) );
+	                      NULL,
+	                      CLSCTX_INPROC_SERVER,
+	                      __uuidof(ISoftUSBString),
+	                      reinterpret_cast<void**>(&piString)) );
 
 	CHECK_FAIL( piString->put_Value(bstrString) );
 
@@ -164,10 +164,10 @@ HRESULT CSoftUSBWrapper::AddDSFString(ISoftUSBDevice *pUSBDevice, LPCWSTR sStrin
 
 Exit:
 	RELEASE(piString);
-    RELEASE(piStrings);
-    ::SysFreeString(bstrString);
+	RELEASE(piStrings);
+	::SysFreeString(bstrString);
 
-    return hr;
+	return hr;
 }
 
 
@@ -178,7 +178,7 @@ Routine Description:
 HRESULT CSoftUSBWrapper::AddDSFConfigs(ISoftUSBDevice *pUSBDevice, USBIdentifier* pUsbId)
 {
 	HRESULT                 hr               = S_OK;
-    ISoftUSBConfigurations *piConfigurations = NULL;
+	ISoftUSBConfigurations *piConfigurations = NULL;
 	ISoftUSBConfiguration  *piConfig         = NULL;
 
 	// All configurations in the collection will start at 1 index
@@ -190,24 +190,24 @@ HRESULT CSoftUSBWrapper::AddDSFConfigs(ISoftUSBDevice *pUSBDevice, USBIdentifier
 
 	// Create the configuration
 	CHECK_FAIL( CoCreateInstance(CLSID_SoftUSBConfiguration,
-                          NULL,
-                          CLSCTX_INPROC_SERVER,
-                          __uuidof(ISoftUSBConfiguration),
-                          reinterpret_cast<void**>(&piConfig)) );
+	                      NULL,
+	                      CLSCTX_INPROC_SERVER,
+	                      __uuidof(ISoftUSBConfiguration),
+	                      reinterpret_cast<void**>(&piConfig)) );
 
-    // Set the configuration data up
+	// Set the configuration data up
 	for (BYTE index = 1; index <= pUsbId->configNo; index++, confIndex.lVal++) {
 		USBIdentifier::USBConfiguration *pConfiguration = &pUsbId->pConfig[index - 1];
 
 		CHECK_FAIL( piConfig->put_ConfigurationValue(index) );                     // The configuration identifier
-	    CHECK_FAIL( CSoftUSBWrapper::AddDSFString(pUSBDevice, pConfiguration->sConfiguration, pUsbId->stringIndex) );
-	    CHECK_FAIL( piConfig->put_Configuration(pUsbId->stringIndex++) );          // The configuration string
-	    CHECK_FAIL( piConfig->put_MaxPower(0) );                                   // Max bus power consumption in 2mA units
-	    CHECK_FAIL( piConfig->put_Attributes(pConfiguration->configAttr.Byte) );   // The configuration attribute data
-	    // Add the interfaces defined for the current configuration
-	    CHECK_FAIL( CSoftUSBWrapper::AddDSFInterfaces(pUSBDevice, piConfig, pUsbId, pConfiguration) );
+		CHECK_FAIL( CSoftUSBWrapper::AddDSFString(pUSBDevice, pConfiguration->sConfiguration, pUsbId->stringIndex) );
+		CHECK_FAIL( piConfig->put_Configuration(pUsbId->stringIndex++) );          // The configuration string
+		CHECK_FAIL( piConfig->put_MaxPower(0) );                                   // Max bus power consumption in 2mA units
+		CHECK_FAIL( piConfig->put_Attributes(pConfiguration->configAttr.Byte) );   // The configuration attribute data
+		// Add the interfaces defined for the current configuration
+		CHECK_FAIL( CSoftUSBWrapper::AddDSFInterfaces(pUSBDevice, piConfig, pUsbId, pConfiguration) );
 
-	    // Add the configuration to the collection
+		// Add the configuration to the collection
 		CHECK_FAIL( piConfigurations->Add(reinterpret_cast<SoftUSBConfiguration*>(piConfig), confIndex) );
 
 		RELEASE(piConfig);
@@ -216,7 +216,7 @@ HRESULT CSoftUSBWrapper::AddDSFConfigs(ISoftUSBDevice *pUSBDevice, USBIdentifier
 Exit:
 	RELEASE(piConfig);
 	RELEASE(piConfigurations);
-    return hr;
+	return hr;
 }
 
 
@@ -227,15 +227,15 @@ Routine Description:
 HRESULT CSoftUSBWrapper::AddDSFInterfaces(ISoftUSBDevice *pUSBDevice, ISoftUSBConfiguration *piConfig, \
 		USBIdentifier *pUsbId, USBIdentifier::USBConfiguration *pUsbConf)
 {
-    HRESULT hr = S_OK;
+	HRESULT hr = S_OK;
 	ISoftUSBInterfaces     *piInterfaces     = NULL;
 	ISoftUSBInterface      *piInterface      = NULL;
 	ISoftUSBEndpoints      *piEndpoints      = NULL;
 	ISoftUSBEndpoint       *piEndpoint       = NULL;
 
 	// All interfaces the collection will start at 1 index
-    VARIANT                 iIndex; ::VariantInit(&iIndex);
-    iIndex.vt = VT_I4; iIndex.lVal = 1;
+	VARIANT                 iIndex; ::VariantInit(&iIndex);
+	iIndex.vt = VT_I4; iIndex.lVal = 1;
 
 	// Get the USB Device Configuration interface collection
 	CHECK_FAIL( piConfig->get_Interfaces(&piInterfaces) );
@@ -254,45 +254,45 @@ HRESULT CSoftUSBWrapper::AddDSFInterfaces(ISoftUSBDevice *pUSBDevice, ISoftUSBCo
 		CHECK_FAIL( piInterface->put_InterfaceClass(pInterface->_class) );
 		CHECK_FAIL( piInterface->put_InterfaceSubClass(pInterface->subClass) );
 		CHECK_FAIL( piInterface->put_InterfaceProtocol(pInterface->protocol) );
-	    CHECK_FAIL( CSoftUSBWrapper::AddDSFString(pUSBDevice, pInterface->sInterface, pUsbId->stringIndex) );
-	    CHECK_FAIL( piInterface->put_Interface(pUsbId->stringIndex++) ); // The interface string
+		CHECK_FAIL( CSoftUSBWrapper::AddDSFString(pUSBDevice, pInterface->sInterface, pUsbId->stringIndex) );
+		CHECK_FAIL( piInterface->put_Interface(pUsbId->stringIndex++) ); // The interface string
 
-	    // Get the endpoint collection for the current interface
-	    CHECK_FAIL(piInterface->get_Endpoints(&piEndpoints));
+		// Get the endpoint collection for the current interface
+		CHECK_FAIL(piInterface->get_Endpoints(&piEndpoints));
 
-	    // All endpoints in the collection will start at 1 index
-	    VARIANT endpIndex; ::VariantInit(&endpIndex);
-	    endpIndex.vt = VT_I4; endpIndex.lVal = 1;
+		// All endpoints in the collection will start at 1 index
+		VARIANT endpIndex; ::VariantInit(&endpIndex);
+		endpIndex.vt = VT_I4; endpIndex.lVal = 1;
 
-	    // Configure each endpoint of the interface
-	    for (long endpoint = 0; endpoint < pInterface->endpointsNo; endpoint++, endpIndex.lVal++) {
-	    	USBIdentifier::USBEndpoint *pEndpoint  = &pInterface->pEndpoints[endpoint];
-	    	piEndpoint = NULL;
+		// Configure each endpoint of the interface
+		for (long endpoint = 0; endpoint < pInterface->endpointsNo; endpoint++, endpIndex.lVal++) {
+			USBIdentifier::USBEndpoint *pEndpoint  = &pInterface->pEndpoints[endpoint];
+			piEndpoint = NULL;
 
-	        // Create the Endpoint
-	    	CHECK_FAIL( CoCreateInstance(CLSID_SoftUSBEndpoint,
-	                              NULL,
-	                              CLSCTX_INPROC_SERVER,
-	                              __uuidof(ISoftUSBEndpoint),
-	                              reinterpret_cast<void**>(&piEndpoint)) );
-	    	// Configure the Endpoint
-	    	CHECK_FAIL( piEndpoint->put_EndpointAddress(pEndpoint->address) );
-	    	CHECK_FAIL( piEndpoint->put_Attributes(pEndpoint->endpointAttr.Byte) );
-	    	CHECK_FAIL( piEndpoint->put_MaxPacketSize(pEndpoint->maxPacketSize) );
-	    	CHECK_FAIL( piEndpoint->put_Interval(0) );
-	    	CHECK_FAIL( piEndpoint->put_Halted(FALSE) );
+			// Create the Endpoint
+			CHECK_FAIL( CoCreateInstance(CLSID_SoftUSBEndpoint,
+			                      NULL,
+			                      CLSCTX_INPROC_SERVER,
+			                      __uuidof(ISoftUSBEndpoint),
+			                      reinterpret_cast<void**>(&piEndpoint)) );
+			// Configure the Endpoint
+			CHECK_FAIL( piEndpoint->put_EndpointAddress(pEndpoint->address) );
+			CHECK_FAIL( piEndpoint->put_Attributes(pEndpoint->endpointAttr.Byte) );
+			CHECK_FAIL( piEndpoint->put_MaxPacketSize(pEndpoint->maxPacketSize) );
+			CHECK_FAIL( piEndpoint->put_Interval(0) );
+			CHECK_FAIL( piEndpoint->put_Halted(FALSE) );
 
-	    	// Add the Endpoint to the interface endpoint collection
-	    	CHECK_FAIL( piEndpoints->Add(reinterpret_cast<SoftUSBEndpoint*>(piEndpoint), endpIndex) );
+			// Add the Endpoint to the interface endpoint collection
+			CHECK_FAIL( piEndpoints->Add(reinterpret_cast<SoftUSBEndpoint*>(piEndpoint), endpIndex) );
 
-	    	RELEASE(piEndpoint);
-	    }
+			RELEASE(piEndpoint);
+		}
 
-	    // Add the interface to the configuration's interface collection
-	    CHECK_FAIL( piInterfaces->Add(reinterpret_cast<SoftUSBInterface*>(piInterface), iIndex) );
+		// Add the interface to the configuration's interface collection
+		CHECK_FAIL( piInterfaces->Add(reinterpret_cast<SoftUSBInterface*>(piInterface), iIndex) );
 
-	    RELEASE(piEndpoints);
-    	RELEASE(piInterface);
+		RELEASE(piEndpoints);
+		RELEASE(piInterface);
 	}
 
 Exit:
@@ -300,5 +300,5 @@ Exit:
 	RELEASE(piEndpoints);
 	RELEASE(piInterface);
 	RELEASE(piInterfaces);
-    return hr;
+	return hr;
 }

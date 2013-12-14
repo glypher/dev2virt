@@ -67,17 +67,17 @@ SockAddress* SockAddress::ResolveIP(const char *host, USHORT port)
 
 int SockAddress::GetAF(void)
 {
-   return ((struct sockaddr_in *)&m_rawAddr)->sin_family;
+	return ((struct sockaddr_in *)&m_rawAddr)->sin_family;
 }
 
 const void* const SockAddress::GetRaw(void)
 {
-   return &m_rawAddr;
+	return &m_rawAddr;
 }
 
 int SockAddress::GetRawAddrSize(void)
 {
-   return m_rawAddrSize;
+	return m_rawAddrSize;
 }
 
 
@@ -152,13 +152,13 @@ template <class T>
 HRESULT CSocketClient<T>::DeviceIoControl(ULONG request, \
 		T* inputData, ULONG inputSize, T*& returnedData, ULONG &returnedSize)
 {
-    UNREFERENCED_PARAMETER(request);
-    UNREFERENCED_PARAMETER(inputData);
-    UNREFERENCED_PARAMETER(inputSize);
-    UNREFERENCED_PARAMETER(returnedData);
-    UNREFERENCED_PARAMETER(returnedSize);
+	UNREFERENCED_PARAMETER(request);
+	UNREFERENCED_PARAMETER(inputData);
+	UNREFERENCED_PARAMETER(inputSize);
+	UNREFERENCED_PARAMETER(returnedData);
+	UNREFERENCED_PARAMETER(returnedSize);
 
-    return E_NOTIMPL;
+	return E_NOTIMPL;
 }
 
 
