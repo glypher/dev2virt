@@ -1,0 +1,119 @@
+;/*++
+;
+; Copyright (c) 2Virt.com
+;
+; This product is made available subject to the terms of
+; GNU Lesser General Public License Version 3
+;
+;Module Name:
+;
+;    USB2VIRT.INF
+;
+;Abstract:
+;    Installation inf for 2Virt Web Service USB Device
+;
+;--*/
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=Sample
+ClassGuid={28273703-93AE-4992-995C-FE3207B6BAB1}
+Provider=%MSFT%
+DriverVer=01/03/2010,6.1.7600.16385
+CatalogFile=KmdfSamples.cat
+
+
+; ================= Class section =====================
+
+[ClassInstall32]
+Addreg=SampleClassReg     
+
+[SampleClassReg]
+HKR,,,0,%ClassName%
+HKR,,Icon,,-5
+
+
+; ================= Device section =====================
+
+[Manufacturer]
+%MfgName%=2Virt,NTx86
+
+; For Win2K
+[2Virt]
+%USB\VID_02A0&PID_A123.DeviceDesc%=usb2virt.Dev, USB\VID_02A0&PID_A123
+
+; For XP and later
+[2Virt.NTx86]
+%USB\VID_02A0&PID_A123.DeviceDesc%=usb2virt.Dev, USB\VID_02A0&PID_A123
+
+
+[usb2virt.Dev.NT]
+CopyFiles=usb2virt.Files.Ext
+
+[Switch.Dev.NT]
+;dummy section
+
+[Switch.Dev.NT.Services]
+AddService = , %SPSVCINST_ASSOCSERVICE%, 
+
+[usb2virt.Dev.NT.Services]
+AddService = usb2virt, %SPSVCINST_ASSOCSERVICE%, usb2virt.AddService
+
+[usb2virt.AddService]
+DisplayName    = %usb2virt.SvcDesc%
+ServiceType    = 1                  ; SERVICE_KERNEL_DRIVER
+StartType      = 3                  ; SERVICE_DEMAND_START
+ErrorControl   = 1                  ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %10%\System32\Drivers\usb2virt.sys
+AddReg         = usb2virt.AddReg
+LoadOrderGroup = Base
+
+[usb2virt.AddReg]
+
+[usb2virt.Files.Ext]
+usb2virt.sys
+
+[SourceDisksNames]
+1=%Disk_Description%,,,
+
+[SourceDisksFiles]
+usb2virt.sys = 1
+
+[DestinationDirs]
+DefaultDestDir = 12
+
+;-------------- WDF Coinstaller installation
+
+[DestinationDirs]
+CoInstaller_CopyFiles = 11
+
+[usb2virt.Dev.NT.CoInstallers]
+AddReg=CoInstaller_AddReg
+CopyFiles=CoInstaller_CopyFiles
+
+[CoInstaller_CopyFiles]
+WdfCoInstaller01009.dll
+
+[SourceDisksFiles]
+WdfCoInstaller01009.dll=1 ; make sure the number matches with SourceDisksNames
+
+[CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller01009.dll,WdfCoInstaller"
+
+[usb2virt.Dev.NT.Wdf]
+KmdfService = usb2virt, usb2virt_wdfsect
+
+[usb2virt_wdfsect]
+KmdfLibraryVersion = 1.9
+
+;---------------------------------------------------------------;
+
+[Strings]
+MSFT="2Virt"
+MfgName="2virt.com"
+Disk_Description="Usb2Virt Installation Disk"
+USB\VID_02A0&PID_A123.DeviceDesc="2Virt Web Service USB Bulk Driver"
+usb2virt.SvcDesc  = "2Virt Web Service USB Driver"
+ClassName         = "2Virt Device"
+SPSVCINST_ASSOCSERVICE = 0x00000002
+

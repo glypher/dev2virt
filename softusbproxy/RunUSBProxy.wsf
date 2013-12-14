@@ -1,0 +1,255 @@
+<PACKAGE>
+
+<COMMENT>
+
+Copyright (c) 2Virt.com
+This product is made available subject to the terms of GNU Lesser General Public License Version 3
+
+
+This test script creates a simulated USB 2.0 USB to Char convertor device and plugs
+it into the root hub of a simulated EHCI controller. 
+
+If you haven't done so already then you must create a simulated EHCI
+controller before running this script. You can do this by running the
+following from a CMD window:
+
+    "\Program Files\dsf\softehci\softehcicfg.exe" /install
+
+To run this script open a CMD window and type:
+
+    cscript RunUSBProxy.wsf
+
+The USBProxy device will operate in event mode. It will promt to enter a Char device
+path to use to forward any USB Requests and Data. The simulation will end when you close
+the command window, and will unplug the USBProxy device from the root hub.
+
+Note: if the operating system prompts you for a driver for the
+USBProxy device you should direct it to install the usbsamp.sys sample
+driver from the WDK.
+
+</COMMENT>
+
+
+<JOB id=RunUSBProxy>
+<REFERENCE OBJECT="DSF.DSF"/>
+<REFERENCE OBJECT="SOFTUSB.SoftUSBDevice"/>
+<SCRIPT LANGUAGE="VBScript">
+
+Option Explicit
+
+const IID_IDSFBus        = "{E927C266-5364-449E-AE52-D6A782AFDA9C}" 
+const IID_ISoftUSBDevice = "{9AC61697-81AE-459A-8629-BF5D5A838519}"
+
+WriteLine "RunUSBProxy.wsf starting"
+
+'Create the DSF object
+Dim DSF : Set DSF = CreateObject("DSF.DSF")
+
+WriteLine "Enumerating simulated devices to look for a simulated EHCI controller"
+Dim CtrlrDev : Set CtrlrDev = EnumSimulatedDevices(IID_IDSFBus)
+
+If CtrlrDev Is Nothing Then
+    Error "Could not find simulated a EHCI controller. Did you remember to run softehcicfg.exe /install?"
+End If
+
+Dim USBProxyDev    : Set USBProxyDev    = WScript.CreateObject("SoftUSBProxy.USBProxyDevice")
+Dim USBProxyDSFDev : Set USBProxyDSFDev = USBProxyDev.DSFDevice
+Dim USBProxyUSBDev : Set USBProxyUSBDev = USBProxyDSFDev.Object(IID_ISoftUSBDevice)
+
+SetEndpointDiagnostics USBProxyUSBDev
+
+WriteLine "Connecting simulated USB Proxy device to simulated EHCI controller"
+Dim Bus : Set Bus = DSF.HotPlug(USBProxyDSFDev, "USB2.0")
+
+WriteLine "Start the event-driven USB-char conversion simulation"
+WriteLine "After the device enumerates open 2Virt .Net App for the user space demo."
+
+USBProxyDev.StartDataProcessing
+
+' Here we will wait for a key stroke in order to exit
+PromptAndWaitForEnterKey "Simulation processing started. Press Enter key to terminate"
+
+Bus.UnPlug USBProxyDSFDev
+USBProxyUSBDev.Destroy
+
+WriteLine "RunUSBProxy.wsf completed"
+WScript.Quit 0
+
+
+
+
+'/////////////////////////////////////////////////////////////////////////////
+' Function USBProxyEvents_LogDataProcessing
+'
+' This event handler is called from the USB Proxy device to log
+' any messages received to and from the kernel driver or from the
+' Char device connection
+'/////////////////////////////////////////////////////////////////////////////
+Function USBProxyEvents_LogDataProcessing(size, data)
+	Dim LogString, sSize, i
+	
+	LogString = "RECEIVED:"
+	' Convert to Long
+	sSize = Clng(size)
+	' Loop the byte array and convert it to string
+	For i = 0 To sSize Step 1
+		LogString = LogString & Chr(data(i))
+	Next
+
+    WriteLine LogString
+
+End Function
+
+
+'/////////////////////////////////////////////////////////////////////////////
+' Sub SetEndpointDiagnostics
+'
+' This routine sets a diagnostic property on all the endpoints in the
+' specified simulated USB device so that you can see all transfers to and 
+' from the device when running under a kernel debugger. This routine will 
+' write information to the console describing every congiguration, interface,
+' and endpoint that it finds.
+'/////////////////////////////////////////////////////////////////////////////
+Private Sub SetEndpointDiagnostics(USBDevice)
+
+    const SOFTUSBENDPOINT_OBJECTFLAGS                     = 100
+    const SOFTUSBENDPOINT_DONOTTRACETRANSFERS             = &H00000000
+    const SOFTUSBENDPOINT_TRACETRANSFERINPUT              = &H00000001
+    const SOFTUSBENDPOINT_TRACETRANSFEROUPUT              = &H00000002
+    const SOFTUSBENDPOINT_TRACETRANSFERINPUTANDOUPUT      = &H00000003
+
+    Dim Config    : Set Config    = Nothing
+    Dim Interface : Set Interface = Nothing
+    Dim Endpoint  : Set Endpoint  = Nothing
+
+    Dim CtlFlags   : CtlFlags   = SOFTUSBENDPOINT_TRACETRANSFERINPUTANDOUPUT
+    Dim OtherFlags : OtherFlags = SOFTUSBENDPOINT_TRACETRANSFERINPUTANDOUPUT
+    Dim FlagsType  : FlagsType  = SOFTUSBENDPOINT_OBJECTFLAGS
+    Dim EPNum :  EPNum = 0 
+    Dim EPDir :  EPDir = 0
+    Dim EPType : EPType = 0
+    
+    USBDevice.Endpoint0.SetObjectFlags FlagsType, CtlFlags
+    
+    For Each Config In USBDevice.Configurations
+        WriteLine "Setting endpoint diagnostics for configuration " & Config.ConfigurationValue
+
+        For Each Interface In Config.Interfaces
+            WriteLine "    Setting endpoint diagnostics for interface " & Interface.InterfaceNumber & " alternate " & Interface.AlternateSetting
+
+            For Each Endpoint In Interface.Endpoints
+                EPNum = Endpoint.EndpointAddress And &H0F
+                EPDir = Endpoint.EndpointAddress And &H80
+                If EPDir = 0 Then
+                    EPDir = "OUT"
+                Else
+                    EPDir = "IN"
+                End If
+
+                EPType = Endpoint.Attributes And &H03
+                Select Case EPType
+                    Case 0:
+                        EPType = "Control"
+                    Case 1:
+                        EPType = "Isoch"
+                    Case 2:
+                        EPType = "Bulk"
+                    Case 3:
+                        EPType = "Interrupt"
+                End Select
+
+                WriteLine "        Endpoint.SetObjectFlags for " & EPType & " " & EPDir & " endpoint " & Hex(EPNum)
+                Endpoint.SetObjectFlags FlagsType, OtherFlags
+
+            Next
+
+        Next
+
+    Next
+
+End Sub
+
+
+
+'/////////////////////////////////////////////////////////////////////////////
+' Function EnumSimulatedDevices
+'
+' This function searches the collection of simulated devices
+' referenced by DSF.Devices for a device that exposes an ancillary
+' object from DSFDevice.Object with the specified GUID. If found it returns the
+' DSFDevice object otherwise it returns Nothing.
+'/////////////////////////////////////////////////////////////////////////////
+Private Function EnumSimulatedDevices(SearchObjectGUID)
+
+    Dim DevSought : Set DevSought = Nothing
+    Dim Dev       : Set Dev = Nothing
+    Dim ObjSought : Set ObjSought = Nothing
+
+    For Each Dev in DSF.Devices
+        If Dev.HasObject(SearchObjectGUID) Then
+            Set ObjSought = Dev.Object(SearchObjectGUID)
+            If Not ObjSought Is Nothing Then
+                Set DevSought = Dev
+                Exit For
+            End If
+        End If
+    Next
+
+    Set EnumSimulatedDevices = DevSought
+
+End Function
+
+
+'/////////////////////////////////////////////////////////////////////////////
+' Sub WriteLine
+'
+' This routine writes the specified text to the console followed by a
+' newline.
+'/////////////////////////////////////////////////////////////////////////////
+Private Sub WriteLine(Text)
+
+    WScript.StdOut.WriteLine text
+
+End Sub
+
+
+'/////////////////////////////////////////////////////////////////////////////
+' Sub Write
+'
+' This routine writes the specified text to the console
+'/////////////////////////////////////////////////////////////////////////////
+Private Sub Write(Text)
+
+    WScript.StdOut.Write text
+
+End Sub
+
+
+'/////////////////////////////////////////////////////////////////////////////
+' Sub Error
+'
+' This routine writes the specified text to the console and
+' terminates the script
+'/////////////////////////////////////////////////////////////////////////////
+Private Sub Error(msg)
+    WriteLine "Script terminating due to error"
+    WriteLine msg
+    WScript.Quit 1
+End Sub
+
+
+'/////////////////////////////////////////////////////////////////////////////
+' Sub PromptAndWaitForEnterKey
+'
+' This routine displays the specified text and then waits for the user
+' to press Enter
+'/////////////////////////////////////////////////////////////////////////////
+Private Sub PromptAndWaitForEnterKey(text)
+    Write text
+    Dim x : x = WScript.StdIn.ReadLine()
+End Sub
+
+
+</SCRIPT>
+</JOB>
+</PACKAGE>

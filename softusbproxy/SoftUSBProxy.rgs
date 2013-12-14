@@ -1,0 +1,12 @@
+HKCR
+{
+    NoRemove AppID
+    {
+        '%APPID%' = s 'SoftUSBProxy'
+        'SoftUSBProxy.EXE'
+        {
+            val AppID = s '%APPID%'
+        }
+    }
+}
+

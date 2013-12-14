@@ -1,0 +1,27 @@
+HKCR
+{
+    SoftUSBProxy.USBProxyDevice.1 = s 'USBProxyDevice Class'
+    {
+        CLSID = s '{BFB167AD-DBC0-4A9F-9608-25A3FD44D984}'
+    }
+    SoftUSBProxy.USBProxyDevice = s 'USBProxyDevice Class'
+    {
+        CLSID = s '{BFB167AD-DBC0-4A9F-9608-25A3FD44D984}'
+        CurVer = s 'SoftUSBProxy.USBProxyDevice.1'
+    }
+    NoRemove CLSID
+    {
+        ForceRemove {BFB167AD-DBC0-4A9F-9608-25A3FD44D984} = s 'USBProxyDevice Class'
+        {
+            ProgID = s 'SoftUSBProxy.USBProxyDevice.1'
+            VersionIndependentProgID = s 'SoftUSBProxy.USBProxyDevice'
+            ForceRemove 'Programmable'
+            InprocServer32 = s '%MODULE%'
+            {
+                val ThreadingModel = s 'Apartment'
+            }
+            'TypeLib' = s '{4B768521-1B4D-4641-ADCB-C238D805AA42}'
+        }
+    }
+}
+

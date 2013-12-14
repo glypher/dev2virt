@@ -1,0 +1,19 @@
+#include <windows.h>
+
+#include <ntverp.h>
+
+#define VER_FILETYPE                VFT_DRV
+#define VER_FILESUBTYPE             VFT2_DRV_SYSTEM
+#define VER_FILEDESCRIPTION_STR     "2Virt Web Service USB Driver"
+#define VER_INTERNALNAME_STR        "usb2virt.sys"
+#define VER_ORIGINALFILENAME_STR    "usb2virt.sys"
+
+#include "common.ver"
+
+//
+// Include auto-generated string resources (created by MC.EXE from 
+// osrusbfx2.man)
+// 
+
+#include "usb2virtEvents.rc"
+

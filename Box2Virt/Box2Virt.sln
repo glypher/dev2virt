@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual C# Express 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Box2Virt", "Box2Virt\Box2Virt.csproj", "{9C771598-6E11-4F49-B55C-B3F933B525B5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "2Virt", "2Virt\2Virt.csproj", "{B194FC35-7796-4C91-B065-149C337CE3B5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9C771598-6E11-4F49-B55C-B3F933B525B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C771598-6E11-4F49-B55C-B3F933B525B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C771598-6E11-4F49-B55C-B3F933B525B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C771598-6E11-4F49-B55C-B3F933B525B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B194FC35-7796-4C91-B065-149C337CE3B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B194FC35-7796-4C91-B065-149C337CE3B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B194FC35-7796-4C91-B065-149C337CE3B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B194FC35-7796-4C91-B065-149C337CE3B5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

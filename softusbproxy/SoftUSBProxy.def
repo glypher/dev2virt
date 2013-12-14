@@ -1,0 +1,21 @@
+;BUILD Version 0000;
+;
+;Copyright (c) 2Virt.com. 
+;This product is made available subject to the terms of GNU Lesser General Public License Version 3
+;
+;Module Name:
+;
+;   SoftUSBProxy.DLL 
+;
+;Abstract:
+;    Declares the module parameters
+;
+
+LIBRARY      "SoftUSBProxy.DLL"
+
+EXPORTS
+    DllCanUnloadNow     PRIVATE
+    DllGetClassObject   PRIVATE
+    DllRegisterServer   PRIVATE
+    DllUnregisterServer PRIVATE
+

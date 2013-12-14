@@ -1,0 +1,90 @@
+/*++BUILD Version 0000
+
+Copyright (c) 2Virt.com. 
+This product is made available subject to the terms of GNU Lesser General Public License Version 3
+
+Module Name:
+
+    SoftUSBProxy.idl
+
+Abstract:
+    Library definition for SoftUSBIpProxy device - to redirect USB bulk data to a Char Device 
+
+--*/
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+
+[
+    uuid(4B768521-1B4D-4641-ADCB-C238D805AA42), // generated with GuidGen.exe tool
+    version(1.0),
+    helpstring("SoftUSBProxy 1.0 Type Library")
+]
+library SoftUSBProxyLib
+{
+    importlib("stdole2.tlb");
+    importlib("dsfif.tlb");
+
+
+    [
+        object,
+        uuid(08DD46B9-C29E-4B44-87B2-4B7B16A57B72), // generated with GuidGen.exe tool
+        oleautomation,
+        dual,
+        nonextensible,
+        helpstring("SoftUSBProxy Interface"),
+        pointer_default(unique)
+    ]
+    interface IUSBProxyDevice : IDispatch
+    {
+        [
+            propget, 
+            id(1),
+            helpstring("property DSFDevice - the Windows Simulation Framework device handler")
+        ]
+        HRESULT DSFDevice([out, retval] DSFDevice** ppDSFDEevice);
+
+        [
+            id(2),
+            helpstring("Starts event-driven simulation and returns immediately to caller.")
+        ]
+        HRESULT _stdcall StartDataProcessing();
+
+        [
+            id(3),
+            helpstring("Stops event-driven simulation started by a prior call to StartAsyncEventProcessing.")
+        ]
+        HRESULT _stdcall StopDataProcessing();
+    };
+
+
+    [
+        uuid(5644E017-79C7-4554-BD83-1A94142D786D), // generated with GuidGen.exe tool
+        nonextensible,
+        helpstring("USBProxy device event interface."),
+
+    ]
+    dispinterface IUSBProxyDeviceEvents
+    {
+        properties:
+        methods:
+        [
+            id(1),
+            helpstring("Client can install a log handler for data processing")
+        ]
+        HRESULT _stdcall LogDataProcessing([in] BSTR data);
+    }
+
+
+    [
+        uuid(BFB167AD-DBC0-4A9F-9608-25A3FD44D984), // generated with GuidGen.exe tool
+        helpstring("USBProxyDevice Class for controlling the USBProxy simulated firmware")
+    ]
+    coclass USBProxyDevice
+    {
+        [default] interface IUSBProxyDevice;
+        [default, source] dispinterface IUSBProxyDeviceEvents;
+    };
+};
+
